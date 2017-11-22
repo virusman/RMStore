@@ -143,10 +143,11 @@
 - (void)testAddPayment_UnknownProduct_Block_Block
 {
     __block BOOL failureBlockCalled;
-    [_store addPayment:@"test" success:^(SKPaymentTransaction *transaction) {
+    [_store addPayment:@"test" success:^(SKPaymentTransaction *transaction, RMStoreFinishTransactionBlock finishBlock) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warc-retain-cycles"
         XCTFail(@"Success block");
+        finishBlock();
 #pragma GCC diagnostic pop
     } failure:^(SKPaymentTransaction *transaction, NSError *error) {
         failureBlockCalled = YES;
@@ -692,7 +693,8 @@
     id product = [OCMockObject mockForClass:[SKProduct class]];
     [[[product stub] andReturn:@"test"] productIdentifier];
     (_store.products)[@"test"] = product;
-    [_store addPayment:@"test" success:^(SKPaymentTransaction *transaction) {
+    [_store addPayment:@"test" success:^(SKPaymentTransaction *transaction, RMStoreFinishTransactionBlock finishBlock) {
+        finishBlock();
        XCTAssertEqualObjects(transaction, originalTransaction, @"");
     } failure:^(SKPaymentTransaction *transaction, NSError *error) {
         XCTFail(@"");
@@ -927,7 +929,8 @@
     id product = [OCMockObject mockForClass:[SKProduct class]];
     [[[product stub] andReturn:@"test"] productIdentifier];
     (_store.products)[@"test"] = product;
-    [_store addPayment:@"test" success:^(SKPaymentTransaction *transaction) {
+    [_store addPayment:@"test" success:^(SKPaymentTransaction *transaction,RMStoreFinishTransactionBlock finishBlock) {
+        finishBlock();
         XCTFail(@"");
     } failure:^(SKPaymentTransaction *transaction, NSError *error) {
         XCTAssertEqualObjects(transaction, originalTransaction, @"");
